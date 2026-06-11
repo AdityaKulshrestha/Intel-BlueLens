@@ -12,7 +12,7 @@ export default function LayerStack({ layers, selectedLayerId, onSelect }: LayerS
   const sortedLayers = [...layers].sort((a, b) => a.id - b.id);
 
   return (
-    <div className="relative flex-1 flex items-center justify-center md:pr-12 lg:pr-24 min-h-[60vh] md:min-h-full p-8 perspective-1000 mt-8 md:mt-24">
+    <div className="relative flex-1 flex items-center justify-center min-h-[60vh] md:min-h-full p-10 md:pl-12 md:pr-8 lg:pl-16 lg:pr-10 perspective-1000 mt-[160px]">
       
       {/* The 3D Stack Container */}
       <motion.div 
@@ -35,7 +35,7 @@ export default function LayerStack({ layers, selectedLayerId, onSelect }: LayerS
               initial={{ z: baseZ, opacity: 0 }}
               animate={{ 
                 z: isSelected ? 250 : baseZ, // constant z for uniform size
-                x: isSelected ? -240 : 0, // fixed uniform distance when selected
+                x: isSelected ? -340 : 0, // fixed uniform distance when selected
                 y: isSelected ? 0 : 0, // fixed uniform vertical position
                 rotateX: isSelected ? -55 : 0, // undo parent rotateX 
                 rotateZ: isSelected ? 35 : 0,  // undo parent rotateZ

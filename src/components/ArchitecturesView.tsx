@@ -3,43 +3,37 @@ import { motion, AnimatePresence } from 'motion/react';
 import { architecturesData } from '../dataArchitectures';
 import { Info } from 'lucide-react';
 
-export default function ArchitecturesView() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([architecturesData[0].id]);
-  const [isCompareMode, setIsCompareMode] = useState(false);
+// ─── Box — defined OUTSIDE ArchitecturesView to prevent remount on hover ────
+type SetHoveredFn = (node: { title: string; details: Record<string, any> } | null) => void;
 
-  const [hoveredNode, setHoveredNode] = useState<{ title: string, details: Record<string, any> } | null>(null);
+function Box({ title, details, className = "", onHover }: {
+  title: string;
+  details?: Record<string, any>;
+  className?: string;
+  onHover: SetHoveredFn;
+}) {
+  return (
+    <div
+      className={`border border-intel-border bg-white p-4 rounded hover:bg-intel-bg hover:border-intel-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center relative group shadow-sm ${className}`}
+      onMouseEnter={() => details && Object.keys(details).length > 0 && onHover({ title, details })}
+      onMouseLeave={() => onHover(null)}
+    >
+      <span className="text-xs font-bold text-intel-dark uppercase tracking-wide z-10">{title}</span>
+      {details && Object.keys(details).length > 0 && (
+        <div className="absolute top-2 right-2 text-intel-primary opacity-0 group-hover:opacity-100 transition-opacity">
+          <Info className="w-3 h-3" />
+        </div>
+      )}
+    </div>
+  );
+}
 
-  const handleSelect = (id: string) => {
-    if (isCompareMode) {
-      if (selectedIds.includes(id)) {
-        if (selectedIds.length > 1) setSelectedIds(selectedIds.filter(i => i !== id));
-      } else {
-        if (selectedIds.length < 2) setSelectedIds([...selectedIds, id]);
-        else setSelectedIds([selectedIds[1], id]); // Keep last 2
-      }
-    } else {
-      setSelectedIds([id]);
-    }
-  };
-
-  const Box = ({ title, details, className = "" }: { title: string, details?: Record<string, any>, className?: string }) => {
-    return (
-      <div 
-        className={`border border-intel-border bg-white p-4 rounded hover:bg-intel-bg hover:border-intel-primary transition-colors cursor-pointer flex flex-col items-center justify-center text-center relative group shadow-sm ${className}`}
-        onMouseEnter={() => details && setHoveredNode({ title, details })}
-        onMouseLeave={() => setHoveredNode(null)}
-      >
-        <span className="text-xs font-bold text-intel-dark uppercase tracking-wide z-10">{title}</span>
-        {details && Object.keys(details).length > 0 && (
-          <div className="absolute top-2 right-2 text-intel-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            <Info className="w-3 h-3" />
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const ArchitectureDiagram = ({ archId, onDropToPane }: { archId?: string, onDropToPane?: (droppedId: string) => void }) => {
+// ─── ArchitectureDiagram — defined OUTSIDE ArchitecturesView ────────────────
+function ArchitectureDiagram({ archId, onDropToPane, onHover }: {
+  archId?: string;
+  onDropToPane?: (droppedId: string) => void;
+  onHover: SetHoveredFn;
+}) {
     if (!archId) {
       return (
         <div 
@@ -107,24 +101,24 @@ export default function ArchitecturesView() {
                 </div>
                 
                 <div className="w-6 border-t border-intel-primary/50 border-dashed" />
-                <Box title="Token Embedding" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-primary/5 border-intel-primary/30" details={{ vocab_size: config.vocab_size, hidden_size: config.hidden_size }} />
+                <Box onHover={onHover} title="Token Embedding" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-primary/5 border-intel-primary/30" details={{ vocab_size: config.vocab_size, hidden_size: config.hidden_size }} />
                 
                 <div className="w-6 border-t border-intel-primary/50 border-dashed" />
                 <div className="min-w-[120px] h-20 border-2 border-intel-primary/20 bg-intel-bg rounded-lg flex flex-col items-center justify-center p-3 cursor-pointer hover:border-intel-primary transition-colors shadow-sm"
-                  onMouseEnter={() => setHoveredNode({ title: 'Decoder Block Stack', details: { num_hidden_layers: config.num_hidden_layers, hidden_size: config.hidden_size, architectures: config.architectures } })}
-                  onMouseLeave={() => setHoveredNode(null)}
+                  onMouseEnter={() => onHover({ title: 'Decoder Block Stack', details: { num_hidden_layers: config.num_hidden_layers, hidden_size: config.hidden_size, architectures: config.architectures } })}
+                  onMouseLeave={() => onHover(null)}
                 >
                   <span className="text-sm font-bold text-intel-dark uppercase tracking-wide text-center">Model Layer</span>
                   <span className="text-[10px] text-intel-primary font-mono mt-1 bg-intel-primary/10 px-2 py-0.5 rounded whitespace-nowrap">× {config.num_hidden_layers} Blocks</span>
                 </div>
 
                 <div className="w-6 border-t border-intel-primary/50 border-dashed" />
-                <Box title="Final RMSNorm" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-bg border-intel-border/50" />
+                <Box onHover={onHover} title="Final RMSNorm" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-bg border-intel-border/50" />
                 
                 <div className="w-6 border-t border-intel-primary/50 border-dashed relative">
                   <span className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] text-intel-muted/80 font-mono">Vocab</span>
                 </div>
-                <Box title="Linear Output" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-primary/5 border-intel-primary/30" details={{ vocab_size: config.vocab_size }} />
+                <Box onHover={onHover} title="Linear Output" className="min-w-[120px] h-16 flex items-center justify-center bg-intel-primary/5 border-intel-primary/30" details={{ vocab_size: config.vocab_size }} />
               </div>
             </div>
 
@@ -146,7 +140,7 @@ export default function ArchitecturesView() {
                 <div className="h-full border border-intel-primary/20 bg-intel-bg/50 rounded-xl p-4 flex flex-row items-center relative group hover:border-intel-primary transition-colors shadow-sm gap-3">
                   <div className="absolute -top-3 left-6 bg-white border border-intel-border text-[9px] uppercase font-bold tracking-widest text-intel-dark px-2 py-0.5 rounded-full shadow-sm">Attention Block</div>
                   
-                  <Box title="RMSNorm (Pre)" className="w-24 h-16 flex items-center justify-center p-2 text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
+                  <Box onHover={onHover} title="RMSNorm (Pre)" className="w-24 h-16 flex items-center justify-center p-2 text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
                   <div className="w-4 border-t border-intel-primary/50" />
                   
                   <div className="flex flex-row items-center gap-2">
@@ -157,19 +151,20 @@ export default function ArchitecturesView() {
                     
                     {hasMLA ? (
                       <div className="w-48 h-16 flex flex-row items-center gap-1 rounded bg-intel-primary/5 border border-intel-primary/30 p-1">
-                        <Box title="Latent Compress" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-white flex items-center justify-center text-center p-1 leading-tight" />
+                        <Box onHover={onHover} title="Latent Compress" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-white flex items-center justify-center text-center p-1 leading-tight" />
                         <span className="text-[7px] text-center text-intel-primary font-mono tracking-widest leading-none rotate-180" style={{ writingMode: 'vertical-rl' }}>KV Cache</span>
-                        <Box title="MLA Expand" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-intel-primary text-white flex items-center justify-center text-center p-1 leading-tight" />
+                        <Box onHover={onHover} title="MLA Expand" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-intel-primary text-white flex items-center justify-center text-center p-1 leading-tight" />
                       </div>
                     ) : hasGDN ? (
                       <div className="w-48 h-16 flex flex-row items-center gap-1 rounded bg-intel-primary/5 border border-intel-primary/30 p-1">
-                        <Box title="Data Gating" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-white flex items-center justify-center text-center p-1 leading-tight" />
+                        <Box onHover={onHover} title="Data Gating" className="w-[45%] text-[9px] h-full shadow-none border-intel-primary/40 bg-white flex items-center justify-center text-center p-1 leading-tight" />
                         <span className="text-[7px] text-center text-intel-primary font-mono tracking-widest leading-none rotate-180" style={{ writingMode: 'vertical-rl' }}>Delta Upd</span>
-                        <Box title="State Matrix" className="w-[45%] text-[9px] h-full shadow-none bg-intel-primary text-white border-none flex items-center justify-center text-center p-1 leading-tight" />
+                        <Box onHover={onHover} title="State Matrix" className="w-[45%] text-[9px] h-full shadow-none bg-intel-primary text-white border-none flex items-center justify-center text-center p-1 leading-tight" />
                       </div>
                     ) : (
                       <div className="w-32 h-16 flex items-center justify-center">
                         <Box 
+                          onHover={onHover}
                           title={config.num_attention_heads !== config.num_key_value_heads ? "Grouped-Query Attention" : "Multi-Head Attention"} 
                           className="w-full h-full p-2 bg-intel-primary text-white border-intel-alt text-[10px] flex items-center justify-center text-center leading-tight" 
                         />
@@ -180,7 +175,7 @@ export default function ArchitecturesView() {
                   {isPlamo && (
                     <>
                       <div className="w-4 border-t border-intel-primary/50" />
-                      <Box title="RMSNorm (Post)" className="w-24 h-16 p-2 flex items-center justify-center border-intel-primary/40 bg-intel-primary/5 text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
+                      <Box onHover={onHover} title="QK-Norm" className="w-20 h-16 p-2 flex items-center justify-center bg-slate-50 border-slate-300 text-center text-[9px]" details={{ desc: 'Per-head RMSNorm on Q and K before RoPE (PLaMo-3 specific)', hidden_size: config.hidden_size }} />
                     </>
                   )}
                 </div>
@@ -191,17 +186,17 @@ export default function ArchitecturesView() {
                 <div className="h-full border border-intel-primary/20 bg-intel-bg/50 rounded-xl p-4 flex flex-row items-center relative group hover:border-intel-primary transition-colors shadow-sm gap-3">
                   <div className="absolute -top-3 left-6 bg-white border border-intel-border text-[9px] uppercase font-bold tracking-widest text-intel-dark px-2 py-0.5 rounded-full shadow-sm">FeedForward Module</div>
                   
-                  <Box title="RMSNorm (Pre)" className="w-24 h-16 p-2 flex items-center justify-center text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
+                  <Box onHover={onHover} title="RMSNorm (Pre)" className="w-24 h-16 p-2 flex items-center justify-center text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
                   <div className="w-4 border-t border-intel-primary/50" />
                   
                   {hasMoE ? (
                     <div className="h-20 border border-intel-border rounded p-2 bg-white flex flex-row items-center gap-2 relative shadow-sm">
                       <div className="absolute -top-3 left-2 text-[8px] bg-white border border-intel-primary text-intel-primary px-2 py-0.5 rounded font-mono z-10 shadow-sm">Expert routing</div>
-                      <Box title="Router" className="w-16 h-full bg-intel-bg text-[10px] flex items-center justify-center" />
+                      <Box onHover={onHover} title="Router" className="w-16 h-full bg-intel-bg text-[10px] flex items-center justify-center" />
                       <div className="flex flex-col h-full gap-1 justify-center min-w-[64px]">
-                        <Box title="Exp 1" className="flex-1 text-[9px] bg-intel-dark text-white border-none py-0.5 px-1 flex items-center justify-center" />
+                        <Box onHover={onHover} title="Exp 1" className="flex-1 text-[9px] bg-intel-dark text-white border-none py-0.5 px-1 flex items-center justify-center" />
                         <span className="text-[8px] font-bold text-intel-muted px-1 text-center leading-none">...</span>
-                        <Box title="Exp N" className="flex-1 text-[9px] bg-intel-bg border-intel-border py-0.5 px-1 flex items-center justify-center" details={{ experts: config.moe_experts }} />
+                        <Box onHover={onHover} title="Exp N" className="flex-1 text-[9px] bg-intel-bg border-intel-border py-0.5 px-1 flex items-center justify-center" details={{ experts: config.moe_experts }} />
                       </div>
                     </div>
                   ) : (
@@ -209,21 +204,15 @@ export default function ArchitecturesView() {
                       <div className="absolute -top-2.5 left-2 text-[8px] bg-white text-intel-primary border border-intel-primary/20 rounded px-1.5 py-0.5 font-mono z-10 shadow-sm leading-none whitespace-nowrap">
                         Dim: {config.intermediate_size}
                       </div>
-                      <Box title="Linear Up" className="w-20 h-full bg-intel-bg border-intel-border/50 text-[10px] flex items-center justify-center" />
+                      <Box onHover={onHover} title="Linear Up" className="w-20 h-full bg-intel-bg border-intel-border/50 text-[10px] flex items-center justify-center" />
                       <div className="h-full flex flex-col items-center justify-center relative px-1">
                         <div className="absolute w-full h-px bg-intel-primary/30 z-0 top-1/2" />
-                        <Box title={config.hidden_act || 'SwiGLU'} className="px-2 h-full bg-intel-primary text-white border-intel-alt z-10 text-[10px] flex items-center justify-center whitespace-nowrap" />
+                        <Box onHover={onHover} title={config.hidden_act || 'SwiGLU'} className="px-2 h-full bg-intel-primary text-white border-intel-alt z-10 text-[10px] flex items-center justify-center whitespace-nowrap" />
                       </div>
-                      <Box title="Linear Down" className="w-20 h-full bg-intel-bg border-intel-border/50 text-[10px] flex items-center justify-center" />
+                      <Box onHover={onHover} title="Linear Down" className="w-20 h-full bg-intel-bg border-intel-border/50 text-[10px] flex items-center justify-center" />
                     </div>
                   )}
 
-                  {isPlamo && (
-                    <>
-                      <div className="w-4 border-t border-intel-primary/50" />
-                      <Box title="RMSNorm (Post)" className="w-24 h-16 p-2 flex items-center justify-center border-intel-primary/40 bg-intel-primary/5 text-center" details={{ rms_norm_eps: config.rms_norm_eps }} />
-                    </>
-                  )}
                 </div>
               </div>
             </div>
@@ -244,8 +233,8 @@ export default function ArchitecturesView() {
                  
                  {/* GEMM */}
                  <div className="w-32 border-2 border-intel-primary bg-intel-primary/5 rounded-lg flex flex-col p-3 relative group cursor-pointer hover:border-intel-alt shadow-sm transition-all justify-center"
-                    onMouseEnter={() => setHoveredNode({ title: hasMoE ? 'MoE Expert & Dense Layers' : 'Linear Dense Layers', details: { "Target": hasMoE ? "MoE Routing & MLP" : "MLP & Linear projections", "Kernels": "oneDNN (for XPU and CPU both)" } })}
-                    onMouseLeave={() => setHoveredNode(null)}
+                    onMouseEnter={() => onHover({ title: hasMoE ? 'MoE Expert & Dense Layers' : 'Linear Dense Layers', details: { "Target": hasMoE ? "MoE Routing & MLP" : "MLP & Linear projections", "Kernels": "oneDNN (for XPU and CPU both)" } })}
+                    onMouseLeave={() => onHover(null)}
                  >
                     <span className="text-[10px] font-bold text-intel-dark tracking-wide mb-3 text-center">{hasMoE ? "GEMM & Sparse" : "GEMM (Linear)"}</span>
                     <div className="flex flex-col gap-2">
@@ -256,8 +245,8 @@ export default function ArchitecturesView() {
 
                  {/* RMSNorm */}
                  <div className="w-28 border border-intel-border bg-intel-bg rounded-lg flex flex-col p-3 relative group cursor-pointer hover:border-intel-primary hover:shadow-md transition-all justify-center"
-                    onMouseEnter={() => setHoveredNode({ title: 'Normalization', details: { "Target": "RMSNorm", "Kernels": "Custom RMS implementation (SYCL XPU / C++ CPU)" } })}
-                    onMouseLeave={() => setHoveredNode(null)}
+                    onMouseEnter={() => onHover({ title: 'Normalization', details: { "Target": "RMSNorm", "Kernels": "Custom RMS implementation (SYCL XPU / C++ CPU)" } })}
+                    onMouseLeave={() => onHover(null)}
                  >
                     <span className="text-[10px] font-bold text-intel-dark tracking-wide mb-3 text-center">RMSNorm</span>
                     <div className="flex flex-col gap-2">
@@ -268,8 +257,8 @@ export default function ArchitecturesView() {
 
                  {/* Activation */}
                  <div className="w-28 border border-intel-border bg-intel-bg rounded-lg flex flex-col p-3 relative group cursor-pointer hover:border-intel-primary hover:shadow-md transition-all justify-center"
-                    onMouseEnter={() => setHoveredNode({ title: 'Activation', details: { "Target": config.hidden_act || "SwiGLU / GELU", "Kernels": "Custom implementation (SYCL XPU / C++ CPU)" } })}
-                    onMouseLeave={() => setHoveredNode(null)}
+                    onMouseEnter={() => onHover({ title: 'Activation', details: { "Target": config.hidden_act || "SwiGLU / GELU", "Kernels": "Custom implementation (SYCL XPU / C++ CPU)" } })}
+                    onMouseLeave={() => onHover(null)}
                  >
                     <span className="text-[10px] font-bold text-intel-dark tracking-wide mb-3 text-center leading-none">Activation<br/><span className="text-[8px] text-intel-muted font-normal lowercase mt-1 inline-block">({isPlamo ? 'swiglu & gelu' : (config.hidden_act || "swiglu")})</span></span>
                     <div className="flex flex-col gap-2">
@@ -280,8 +269,8 @@ export default function ArchitecturesView() {
 
                  {/* RoPE */}
                  <div className="w-28 border border-intel-border bg-intel-bg rounded-lg flex flex-col p-3 relative group cursor-pointer hover:border-intel-primary hover:shadow-md transition-all justify-center"
-                    onMouseEnter={() => setHoveredNode({ title: 'Positional Embedding', details: { "Target": "RoPE", "Kernels": "Custom RoPE implementation (SYCL XPU / C++ CPU)" } })}
-                    onMouseLeave={() => setHoveredNode(null)}
+                    onMouseEnter={() => onHover({ title: 'Positional Embedding', details: { "Target": "RoPE", "Kernels": "Custom RoPE implementation (SYCL XPU / C++ CPU)" } })}
+                    onMouseLeave={() => onHover(null)}
                  >
                     <span className="text-[10px] font-bold text-intel-dark tracking-wide mb-3 text-center">RoPE</span>
                     <div className="flex flex-col gap-2">
@@ -292,8 +281,8 @@ export default function ArchitecturesView() {
 
                  {/* Attention */}
                  <div className="w-36 border border-intel-border bg-intel-bg rounded-lg flex flex-col p-3 relative group cursor-pointer hover:border-intel-primary hover:shadow-md transition-all justify-center"
-                    onMouseEnter={() => setHoveredNode({ title: 'Attention Block', details: { "Target": hasGDN ? "Gated DeltaNet Core" : hasMLA ? "MLA Decode" : "MHA / GQA", "Kernels": hasGDN || hasMLA ? "Triton API / SYCL" : "Flash Attention (SYCL for XPU / C++ for CPU)" } })}
-                    onMouseLeave={() => setHoveredNode(null)}
+                    onMouseEnter={() => onHover({ title: 'Attention Block', details: { "Target": hasGDN ? "Gated DeltaNet Core" : hasMLA ? "MLA Decode" : "MHA / GQA", "Kernels": hasGDN || hasMLA ? "Triton API / SYCL" : "Flash Attention (SYCL for XPU / C++ for CPU)" } })}
+                    onMouseLeave={() => onHover(null)}
                  >
                     <span className="text-[10px] font-bold text-intel-dark tracking-wide mb-3 text-center">{hasGDN ? "Gated DeltaNet" : hasMLA ? "MLA Decode" : "Flash Attention"}</span>
                     <div className="flex flex-col gap-2">
@@ -309,10 +298,29 @@ export default function ArchitecturesView() {
         </div>
       </div>
     );
+}
+
+// ─── ArchitecturesView — main export ────────────────────────────────────────
+export default function ArchitecturesView() {
+  const [selectedIds, setSelectedIds] = useState<string[]>([architecturesData[0].id]);
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const [hoveredNode, setHoveredNode] = useState<{ title: string; details: Record<string, any> } | null>(null);
+
+  const handleSelect = (id: string) => {
+    if (isCompareMode) {
+      if (selectedIds.includes(id)) {
+        if (selectedIds.length > 1) setSelectedIds(selectedIds.filter(i => i !== id));
+      } else {
+        if (selectedIds.length < 2) setSelectedIds([...selectedIds, id]);
+        else setSelectedIds([selectedIds[1], id]);
+      }
+    } else {
+      setSelectedIds([id]);
+    }
   };
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-[calc(100vh-120px)] mt-[120px] font-sans relative z-10 bg-intel-bg">
+    <div className="flex flex-col md:flex-row w-full h-[calc(100vh-160px)] mt-[160px] font-sans relative z-10 bg-intel-bg">
       
       {/* Sidebar Model Selector */}
       <div className="w-full md:w-[400px] border-r border-intel-border bg-white flex flex-col shrink-0 shadow-sm z-20 h-full">
@@ -409,6 +417,7 @@ export default function ArchitecturesView() {
           <>
             <ArchitectureDiagram 
               archId={selectedIds[0]} 
+              onHover={setHoveredNode}
               onDropToPane={(id) => {
                 if (isCompareMode) {
                   setSelectedIds([id, selectedIds[1]].filter(Boolean));
@@ -421,6 +430,7 @@ export default function ArchitecturesView() {
             {isCompareMode && (
               <ArchitectureDiagram 
                 archId={selectedIds[1]} 
+                onHover={setHoveredNode}
                 onDropToPane={(id) => {
                   setSelectedIds([selectedIds[0], id]);
                 }} 

@@ -8,7 +8,7 @@ interface LayerDetailsProps {
 
 export default function LayerDetails({ layer }: LayerDetailsProps) {
   return (
-    <div className="flex-1 max-w-3xl border-l border-intel-border bg-intel-card h-screen overflow-y-auto custom-scrollbar relative">
+    <div className="flex-1 w-full border-l border-intel-border bg-intel-card h-full overflow-y-auto custom-scrollbar relative">
       <div className="absolute -top-20 -right-20 w-96 h-96 bg-intel-primary opacity-[0.05] rounded-full blur-[100px] pointer-events-none"></div>
       
       <AnimatePresence mode="wait">
@@ -18,7 +18,7 @@ export default function LayerDetails({ layer }: LayerDetailsProps) {
            animate={{ opacity: 1, x: 0 }}
            exit={{ opacity: 0, x: -20 }}
            transition={{ duration: 0.3 }}
-           className="p-10 relative z-10"
+           className="pt-[160px] pl-14 pr-12 pb-12 relative z-10"
         >
           {/* Header */}
           <div className="flex justify-between items-start mb-16">

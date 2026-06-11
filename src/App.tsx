@@ -94,7 +94,7 @@ export default function App() {
               className="absolute inset-0 flex flex-col md:flex-row w-full h-full"
             >
               {/* 3D Stack View - Left Pane */}
-              <div className="w-full md:w-1/2 flex flex-col relative bg-white border-r border-intel-border h-full">
+              <div className="w-full md:w-1/2 flex flex-col relative bg-white border-r-2 border-intel-border h-full shadow-[2px_0_12px_rgba(0,0,0,0.05)]">
                 <LayerStack 
                   layers={layersData} 
                   selectedLayerId={selectedLayerId} 

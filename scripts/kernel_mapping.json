@@ -1,0 +1,42 @@
+{
+  "_comment": "Maps raw vLLM trace kernel names (substrings) to component types and display labels.",
+  "cpu": [
+    { "pattern": "onednn_mm",                        "component": "Linear/MLP",              "label": "oneDNN GEMM (AMX-BF16)" },
+    { "pattern": "weight_packed_linear",              "component": "Linear/MLP",              "label": "Packed Linear (AVX-512BF16)" },
+    { "pattern": "cpu_attention_with_kv_cache",       "component": "GroupedQueryAttention",   "label": "CPU Attention (AMX / AVX-512)" },
+    { "pattern": "unified_attention_with_output",     "component": "GroupedQueryAttention",   "label": "Unified Attention" },
+    { "pattern": "cpu_attn_reshape_and_cache",        "component": "GroupedQueryAttention",   "label": "KV Cache Reshape" },
+    { "pattern": "mla_decode_kvcache",                "component": "MultiLatentAttention",    "label": "MLA Decode KVCache" },
+    { "pattern": "chunk_gated_delta_rule_cpu",        "component": "GatedDeltaNet",           "label": "Gated DeltaNet (CPU)" },
+    { "pattern": "fused_gdn_gating_cpu",              "component": "GatedDeltaNet",           "label": "GDN Gating Fused (CPU)" },
+    { "pattern": "rms_norm",                          "component": "RMSNorm",                 "label": "RMSNorm (AVX-512)" },
+    { "pattern": "fused_add_rms_norm",                "component": "RMSNorm",                 "label": "Fused Add+RMSNorm" },
+    { "pattern": "silu_and_mul",                      "component": "SiLU",                    "label": "SiLU×Mul (AVX-512)" },
+    { "pattern": "gelu_tanh_and_mul",                 "component": "GELU",                    "label": "GeLU-Tanh×Mul (AVX-512)" },
+    { "pattern": "gelu_and_mul",                      "component": "GELU",                    "label": "GeLU×Mul (AVX-512)" },
+    { "pattern": "compute_slot_mapping",              "component": "PagedAttention",          "label": "Slot Mapping" },
+    { "pattern": "aten::embedding",                   "component": "Embedding",               "label": "Embedding (ATen)" },
+    { "pattern": "aten::mm",                          "component": "Linear",                  "label": "aten::mm fallback" },
+    { "pattern": "aten::addmm",                       "component": "Linear",                  "label": "aten::addmm fallback" }
+  ],
+  "xpu": [
+    { "pattern": "flash_attn_varlen",                 "component": "GroupedQueryAttention",   "label": "FlashAttn Varlen (XPU)" },
+    { "pattern": "concat_and_cache_mla",              "component": "MultiLatentAttention",    "label": "MLA KVCache (XPU)" },
+    { "pattern": "merge_attn_states",                 "component": "MultiLatentAttention",    "label": "Merge Attn States (XPU)" },
+    { "pattern": "gdn_attn",                          "component": "GatedDeltaNet",           "label": "GDN Attn (XPU SYCL)" },
+    { "pattern": "grouped_gemm",                      "component": "Linear/MLP",              "label": "Grouped GEMM (XPU)" },
+    { "pattern": "onednn",                            "component": "Linear/MLP",              "label": "oneDNN (XPU)" },
+    { "pattern": "rms_norm",                          "component": "RMSNorm",                 "label": "RMSNorm (XPU)" },
+    { "pattern": "silu_and_mul",                      "component": "SiLU",                    "label": "SiLU×Mul (XPU)" },
+    { "pattern": "gelu",                              "component": "GELU",                    "label": "GeLU (XPU)" }
+  ],
+  "gpu": [
+    { "pattern": "flash_fwd_kernel",                  "component": "GroupedQueryAttention",   "label": "FlashAttn v3 FWD" },
+    { "pattern": "flashattn",                         "component": "GroupedQueryAttention",   "label": "FlashAttention" },
+    { "pattern": "cutlass",                           "component": "Linear/MLP",              "label": "CUTLASS GEMM" },
+    { "pattern": "gemm",                              "component": "Linear/MLP",              "label": "GEMM (CUDA)" },
+    { "pattern": "triton",                            "component": "SiLU",                    "label": "Triton Kernel" },
+    { "pattern": "rms_norm",                          "component": "RMSNorm",                 "label": "RMSNorm (CUDA)" },
+    { "pattern": "embedding",                         "component": "Embedding",               "label": "Embedding (CUDA)" }
+  ]
+}
