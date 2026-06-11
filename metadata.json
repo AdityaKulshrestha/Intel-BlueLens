@@ -1,0 +1,6 @@
+{
+  "name": "Intel BlueLens",
+  "description": "LLM architecture and hardware execution visualizer for Intel platforms",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
