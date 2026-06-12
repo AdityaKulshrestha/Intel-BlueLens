@@ -13,7 +13,7 @@ jobs:
       - name: Install sshpass
         run: |
           sudo apt-get update
-          sudo apt-gt install -y sshpass
+          sudo apt-get install -y sshpass
 
       - name: Deploy
         env:
