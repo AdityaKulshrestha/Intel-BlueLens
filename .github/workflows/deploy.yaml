@@ -21,13 +21,16 @@ jobs:
           USER: ${{ secrets.SERVER_USER }}
           PASS: ${{ secrets.SERVER_PASS }}
         run: |
-          sshpass -p "$PASS" scp -o StrictHostKeyChecking=no \
-          $USER@$HOST << 'EOF'
+          sshpass -p "$PASS" ssh \
+                -o StrictHostKeyChecking=no \
+                $USER@$HOST << 'EOF'
 
-          cd /user-adi/Intel-BlueLens
-          git pull origin main
-          npm install
-          npm run build
-          npm run dev
+                cd /user-adi/Intel-BlueLens
 
-          EOF
+                git pull origin main
+
+                npm install
+
+                npm run build
+
+                EOF
